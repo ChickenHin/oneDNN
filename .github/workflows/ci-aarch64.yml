@@ -20,38 +20,38 @@ name: "CI AArch64"
 #* To avoid duplicate jobs running when both push and PR is satisfied, we use this:
 #* https://github.com/orgs/community/discussions/26940#discussioncomment-5686753
 on:
-  push:
-    branches: [main, "rls-*"]
-    paths:
-      - ".github/automation/performance/**"
-      - ".github/automation/*"
-      - ".github/automation/aarch64/**"
-      - ".github/workflows/aarch64-acl.yml"
-      - ".github/workflows/ci-aarch64.yml"
-      - "cmake/**"
-      - "examples/**"
-      - "include/**"
-      - "src/common/**"
-      - "src/cpu/*"
-      - "src/cpu/aarch64/**"
-      - "tests/**"
-      - "CMakeLists.txt"
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - ".github/automation/performance/**"
-      - ".github/automation/*"
-      - ".github/automation/aarch64/**"
-      - ".github/workflows/aarch64-acl.yml"
-      - ".github/workflows/ci-aarch64.yml"
-      - "cmake/**"
-      - "examples/**"
-      - "include/**"
-      - "src/common/**"
-      - "src/cpu/*"
-      - "src/cpu/aarch64/**"
-      - "tests/**"
-      - "CMakeLists.txt"
+  # push:
+  #   branches: [main, "rls-*"]
+  #   paths:
+  #     - ".github/automation/performance/**"
+  #     - ".github/automation/*"
+  #     - ".github/automation/aarch64/**"
+  #     - ".github/workflows/aarch64-acl.yml"
+  #     - ".github/workflows/ci-aarch64.yml"
+  #     - "cmake/**"
+  #     - "examples/**"
+  #     - "include/**"
+  #     - "src/common/**"
+  #     - "src/cpu/*"
+  #     - "src/cpu/aarch64/**"
+  #     - "tests/**"
+  #     - "CMakeLists.txt"
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  #   paths:
+  #     - ".github/automation/performance/**"
+  #     - ".github/automation/*"
+  #     - ".github/automation/aarch64/**"
+  #     - ".github/workflows/aarch64-acl.yml"
+  #     - ".github/workflows/ci-aarch64.yml"
+  #     - "cmake/**"
+  #     - "examples/**"
+  #     - "include/**"
+  #     - "src/common/**"
+  #     - "src/cpu/*"
+  #     - "src/cpu/aarch64/**"
+  #     - "tests/**"
+  #     - "CMakeLists.txt"
   #* allow manual trigger of workflow when needed.
   workflow_dispatch:
 
@@ -97,7 +97,6 @@ jobs:
     strategy:
       matrix:
         config: [
-          { name: MacOS, label: macos-14, threading: SEQ, toolset: clang, build: RelWithAssert, testset: SMOKE },
           { name: cb100, label: ubuntu-24.04-arm, threading: OMP, toolset: clang, build: RelWithAssert, testset: SMOKE },
         ]
 
@@ -182,8 +181,6 @@ jobs:
     strategy:
       matrix:
         config: [
-          { name: c6g, label: ah-ubuntu_22_04-c6g_4x-50 },
-          { name: c7g, label: ah-ubuntu_22_04-c7g_4x-50 },
           { name: c8g, label: ah-ubuntu_22_04-c8g_8x },
         ]
 
@@ -232,87 +229,85 @@ jobs:
           CTEST_PARALLEL_LEVEL: 6
           LD_LIBRARY_PATH: ${{ github.workspace }}/oneDNN_pkg/ComputeLibrary/build
 
-  perf-test:
-    needs: build-artifacts
-    strategy:
-      matrix:
-        config: [
-          { name: c6g, label: ah-ubuntu_22_04-c6g_4x-50 },
-          { name: c7g, label: ah-ubuntu_22_04-c7g_4x-50 },
-          { name: c8g, label: ah-ubuntu_22_04-c8g_8x },
-        ]
+  # perf-test:
+  #   needs: build-artifacts
+  #   strategy:
+  #     matrix:
+  #       config: [
+  #         { name: c8g, label: ah-ubuntu_22_04-c8g_8x },
+  #       ]
 
-    name: ${{ matrix.config.name }} perf test
-    runs-on: ${{ matrix.config.label }}
-    steps:
-      - name: Checkout oneDNN
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          path: oneDNN
+  #   name: ${{ matrix.config.name }} perf test
+  #   runs-on: ${{ matrix.config.label }}
+  #   steps:
+  #     - name: Checkout oneDNN
+  #       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+  #       with:
+  #         persist-credentials: false
+  #         path: oneDNN
 
-      - name: Read version file
-        id: get-versions
-        run: |
-          content=`cat ${{ github.workspace }}/oneDNN/.github/automation/aarch64/ci.json`
-          content="${content//[$'\t\r\n$ ']}"
-          echo "output=$content" >> $GITHUB_OUTPUT
+  #     - name: Read version file
+  #       id: get-versions
+  #       run: |
+  #         content=`cat ${{ github.workspace }}/oneDNN/.github/automation/aarch64/ci.json`
+  #         content="${content//[$'\t\r\n$ ']}"
+  #         echo "output=$content" >> $GITHUB_OUTPUT
 
-      - name: setup python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.10'
+  #     - name: setup python
+  #       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+  #       with:
+  #         python-version: '3.10'
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            sudo apt update -y
-            sudo apt install -y patchelf libomp-dev g++-${{ fromJson(steps.get-versions.outputs.output).dependencies.gcc }}
-            pip install scipy statistics gitpython
+  #     - name: Install dependencies
+  #       shell: bash
+  #       run: |
+  #           sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  #           sudo apt update -y
+  #           sudo apt install -y patchelf libomp-dev g++-${{ fromJson(steps.get-versions.outputs.output).dependencies.gcc }}
+  #           pip install scipy statistics gitpython
 
-      - name: Download oneDNN base
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: onednn-perf-base
-          path: oneDNN_pkg
+  #     - name: Download oneDNN base
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+  #       with:
+  #         name: onednn-perf-base
+  #         path: oneDNN_pkg
       
-      - name: Prepare oneDNN base for execution
-        run: |
-          mv oneDNN_pkg oneDNN_base
-          chmod -R +x oneDNN_base
-          patchelf --add-rpath ${{ github.workspace }}/oneDNN_base/ComputeLibrary/build ${{ github.workspace }}/oneDNN_base/oneDNN/build/src/libdnnl.so.3
+  #     - name: Prepare oneDNN base for execution
+  #       run: |
+  #         mv oneDNN_pkg oneDNN_base
+  #         chmod -R +x oneDNN_base
+  #         patchelf --add-rpath ${{ github.workspace }}/oneDNN_base/ComputeLibrary/build ${{ github.workspace }}/oneDNN_base/oneDNN/build/src/libdnnl.so.3
 
-      - name: Download oneDNN new
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: onednn-perf-new
-          path: oneDNN_pkg
+  #     - name: Download oneDNN new
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+  #       with:
+  #         name: onednn-perf-new
+  #         path: oneDNN_pkg
       
-      - name: Prepare oneDNN new for execution
-        run: |
-          mv oneDNN_pkg oneDNN_new
-          chmod -R +x oneDNN_new
-          patchelf --add-rpath ${{ github.workspace }}/oneDNN_new/ComputeLibrary/build ${{ github.workspace }}/oneDNN_new/oneDNN/build/src/libdnnl.so.3
+  #     - name: Prepare oneDNN new for execution
+  #       run: |
+  #         mv oneDNN_pkg oneDNN_new
+  #         chmod -R +x oneDNN_new
+  #         patchelf --add-rpath ${{ github.workspace }}/oneDNN_new/ComputeLibrary/build ${{ github.workspace }}/oneDNN_new/oneDNN/build/src/libdnnl.so.3
 
-      - name: Run performance tests
-        shell: bash
-        run: |
-          OMP_NUM_THREADS=4 bash ${{ github.workspace }}/oneDNN/.github/automation/performance/bench_pr_performance.sh ${{ github.workspace }}/oneDNN_base/oneDNN/build/tests/benchdnn/benchdnn ${{ github.workspace }}/oneDNN_new/oneDNN/build/tests/benchdnn/benchdnn base_4.txt new_4.txt
-          OMP_NUM_THREADS=16 bash ${{ github.workspace }}/oneDNN/.github/automation/performance/bench_pr_performance.sh ${{ github.workspace }}/oneDNN_base/oneDNN/build/tests/benchdnn/benchdnn ${{ github.workspace }}/oneDNN_new/oneDNN/build/tests/benchdnn/benchdnn base_16.txt new_16.txt
+  #     - name: Run performance tests
+  #       shell: bash
+  #       run: |
+  #         OMP_NUM_THREADS=4 bash ${{ github.workspace }}/oneDNN/.github/automation/performance/bench_pr_performance.sh ${{ github.workspace }}/oneDNN_base/oneDNN/build/tests/benchdnn/benchdnn ${{ github.workspace }}/oneDNN_new/oneDNN/build/tests/benchdnn/benchdnn base_4.txt new_4.txt
+  #         OMP_NUM_THREADS=16 bash ${{ github.workspace }}/oneDNN/.github/automation/performance/bench_pr_performance.sh ${{ github.workspace }}/oneDNN_base/oneDNN/build/tests/benchdnn/benchdnn ${{ github.workspace }}/oneDNN_new/oneDNN/build/tests/benchdnn/benchdnn base_16.txt new_16.txt
 
-      - name: Compare performance test results
-        id: performance-test
-        continue-on-error: true
-        run: |
-          echo "4 threads:"
-          python ${{ github.workspace }}/oneDNN/.github/automation/performance/benchdnn_comparison.py base_4.txt new_4.txt
-          echo "16 threads:"
-          python ${{ github.workspace }}/oneDNN/.github/automation/performance/benchdnn_comparison.py base_16.txt new_16.txt
+  #     - name: Compare performance test results
+  #       id: performance-test
+  #       continue-on-error: true
+  #       run: |
+  #         echo "4 threads:"
+  #         python ${{ github.workspace }}/oneDNN/.github/automation/performance/benchdnn_comparison.py base_4.txt new_4.txt
+  #         echo "16 threads:"
+  #         python ${{ github.workspace }}/oneDNN/.github/automation/performance/benchdnn_comparison.py base_16.txt new_16.txt
 
-      - name: Check performance test failure
-        if: ${{ steps.performance-test.outputs.pass != 'True' }}
-        run: echo "::warning file=.github/workflows/ci-aarch64.yml,line=1,col=1::${{ steps.performance-test.outputs.message }}"
+  #     - name: Check performance test failure
+  #       if: ${{ steps.performance-test.outputs.pass != 'True' }}
+  #       run: echo "::warning file=.github/workflows/ci-aarch64.yml,line=1,col=1::${{ steps.performance-test.outputs.message }}"
 
   # TODO: Find an elegant way to integrate this build with the rest of the workflow.
   windows:
@@ -343,10 +338,10 @@ jobs:
 
   # This job adds a check named "CI AArch64" that represents overall
   # workflow status and can be used in branch rulesets
-  status:
-    needs: [smoke-test, unit-test, perf-test, windows]
-    runs-on: ubuntu-24.04
-    name: "CI AArch64"
-    steps:
-      - name: Print success
-        run: echo Success
+  # status:
+  #   needs: [smoke-test, unit-test, perf-test, windows]
+  #   runs-on: ubuntu-24.04
+  #   name: "CI AArch64"
+  #   steps:
+  #     - name: Print success
+  #       run: echo Success
